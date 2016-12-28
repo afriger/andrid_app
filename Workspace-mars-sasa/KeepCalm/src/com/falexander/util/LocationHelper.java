@@ -16,10 +16,9 @@ public class LocationHelper implements LocationListener
 {
 
 	private Logger				log								= Logger.Log;
-	private final Context		mContext;
-	private boolean				isGPSEnabled					= false;
-	boolean						isNetworkEnabled				= false;
-	private boolean				canGetLocation					= false;
+	private final Context		m_context;
+	private boolean				m_isGPSEnabled					= false;
+	boolean						m_isNetworkEnabled				= false;
 	Location					m_location;
 	double						m_latitude;
 	double						m_longitude;
@@ -42,7 +41,7 @@ public class LocationHelper implements LocationListener
 	{
 		log.SetSeverity(Severity.trace);
 		mCallback = Callback;
-		this.mContext = context;
+		this.m_context = context;
 		getLocation();
 	}
 
@@ -50,21 +49,20 @@ public class LocationHelper implements LocationListener
 	{
 		try
 		{
-			m_locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+			m_locationManager = (LocationManager) m_context.getSystemService(Context.LOCATION_SERVICE);
 			// getting GPS status
-			isGPSEnabled = m_locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			log.t("isGPSEnabled", "=" + isGPSEnabled);
+			m_isGPSEnabled = m_locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+			log.t("isGPSEnabled", "=" + m_isGPSEnabled);
 			// getting network status
-			isNetworkEnabled = m_locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-			log.t("isNetworkEnabled", "=" + isNetworkEnabled);
-			if (isGPSEnabled == false && isNetworkEnabled == false)
+			m_isNetworkEnabled = m_locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			log.t("isNetworkEnabled", "=" + m_isNetworkEnabled);
+			if (m_isGPSEnabled == false && m_isNetworkEnabled == false)
 			{
 				// no network provider is enabled
 			}
 			else
 			{
-				this.canGetLocation = true;
-				if (isNetworkEnabled)
+				if (m_isNetworkEnabled)
 				{
 					m_location = null;
 					m_locationManager.requestLocationUpdates(
@@ -83,7 +81,7 @@ public class LocationHelper implements LocationListener
 					}
 				}
 
-				if (isGPSEnabled)
+				if (m_isGPSEnabled)
 				{
 					m_location = null;
 					if (m_location == null)
@@ -143,21 +141,21 @@ public class LocationHelper implements LocationListener
 	{
 		if (null == m_locationManager)
 		{
-			m_locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+			m_locationManager = (LocationManager) m_context.getSystemService(Context.LOCATION_SERVICE);
 		}
 		if (null == m_locationManager)
 		{
 			return false;
 		}
-		isGPSEnabled = m_locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		isNetworkEnabled = m_locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-		log.t("isNetworkEnabled", "=" + isNetworkEnabled);
-		return !(isGPSEnabled == false && isNetworkEnabled == false);
+		m_isGPSEnabled = m_locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		m_isNetworkEnabled = m_locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		log.t("isNetworkEnabled", "=" + m_isNetworkEnabled);
+		return !(m_isGPSEnabled == false && m_isNetworkEnabled == false);
 	}
 
 	public void showSettingsAlert()
 	{
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(m_context);
 		// Setting Dialog Title
 		alertDialog.setTitle("GPS is settings");
 		// Setting Dialog Message
@@ -169,7 +167,7 @@ public class LocationHelper implements LocationListener
 					public void onClick(DialogInterface dialog, int which)
 					{
 						Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-						mContext.startActivity(intent);
+						m_context.startActivity(intent);
 					}
 				});
 		// on pressing cancel button

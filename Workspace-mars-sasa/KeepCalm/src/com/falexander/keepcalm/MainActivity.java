@@ -101,6 +101,10 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		}
 		UpdateRescueContact();
 		// SendLocation(null);
+		if (!m_gps.canGetLocation())
+		{
+			m_gps.showSettingsAlert();
+		}
 	}
 
 	@Override
@@ -221,12 +225,13 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	{
 		if (null != m_gps && m_gps.canGetLocation())
 		{
+			m_gps.getLocation();
 			String contact_number = (null == address) ? m_phone_number.getText().toString() : address;
 			if (null == contact_number || contact_number.isEmpty())
 			{
 				return;
 			}
-			m_gps.getLocation();
+		
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(sdf.format(new Date())).append('\n').append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
