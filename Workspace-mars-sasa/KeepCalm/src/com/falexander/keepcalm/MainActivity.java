@@ -12,18 +12,24 @@ import com.falexander.util.SimpleGestureFilter;
 import com.falexander.util.SimpleGestureFilter.SimpleGestureListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -148,13 +154,63 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		{
 			if (data != null && requestCode == REQUEST_CONTACT_NUMBER)
 			{
-				contactPicked(data);
+				ContactPicked(data);
 			}
+		}
+		else
+		{
+			log.t("RESULT_CANCEL");
+			MakeContact();
+			
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	private void contactPicked(Intent data)
+	private void MakeContact()
+	{
+
+		final Context context = this;
+		final ViewGroup nullParent = null;
+		LayoutInflater li = LayoutInflater.from(context);
+		final View promptsView = li.inflate(R.layout.input_dialog, nullParent);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Rescue Phone");
+
+		builder.setView(promptsView);
+
+		// Set up the buttons
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				EditText name = (EditText) promptsView.findViewById(R.id.edMakeName);
+				EditText number = (EditText) promptsView.findViewById(R.id.edMakeNumber);
+				if (null != name)
+				{
+					PreferencesHelper.Edit(context).putString(RESCUE_CONTACT_NAME, name.getText().toString()).commit();
+				}
+				if (null != number)
+				{
+					PreferencesHelper.Edit(context).putString(RESCUE_CONTACT_NUMBER, number.getText().toString()).commit();
+				}
+				UpdateRescueContact();
+			}
+		});
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which)
+			{
+				dialog.cancel();
+			}
+		});
+
+		builder.show();
+	}
+
+	private void ContactPicked(Intent data)
 	{
 		ContentResolver cr = getContentResolver();
 		Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
@@ -180,11 +236,13 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			PreferencesHelper.Edit(this).putString(RESCUE_CONTACT_NAME, name).commit();
 			PreferencesHelper.Edit(this).putString(RESCUE_CONTACT_NUMBER, formattedPhoneNumber).commit();
 			UpdateRescueContact();
+			return;
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			// zoo
 		}
+		log.t("RESULT_EMPTY");
 	}
 
 	private void UpdateRescueContact()
@@ -231,7 +289,6 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			{
 				return;
 			}
-		
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(sdf.format(new Date())).append('\n').append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());

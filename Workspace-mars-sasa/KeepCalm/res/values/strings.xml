@@ -8,5 +8,7 @@
     <string name="empty">Is Empty</string>
     <string name="help_me">HELP ME</string>
     <string name="rescue_phone">Rescue Phone</string>
+    <string name="name">Name:</string>
+    <string name="number">Phone #</string>
 
 </resources>
