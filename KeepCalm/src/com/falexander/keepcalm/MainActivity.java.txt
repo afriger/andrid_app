@@ -1,0 +1,92 @@
+package com.falexander.snakeaf;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import com.falexander.util.LocationHelper;
+import com.falexander.util.LocationInfo;
+import com.falexander.util.PhoneSMSHelper;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.TextView;
+
+public class MainActivity extends Activity implements LocationInfo.Callback
+{
+	// LocationInfo _loc = null;
+	PhoneSMSHelper			_sms	= null;
+	final SimpleDateFormat	sdf		= new SimpleDateFormat("dd-MM-yyyy-hh:mm:ss", Locale.getDefault());
+
+	LocationHelper			mGPS	= null;
+	private TextView		m_tv;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		mGPS = new LocationHelper(this);
+		// _loc = new LocationInfo(this, this);
+		_sms = new PhoneSMSHelper(this);
+		_sms.Start();
+		m_tv = (TextView) findViewById(R.id.textView1);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings)
+		{
+			// _loc.Start(this);
+			// UpdateLocation();
+
+			if (mGPS.canGetLocation)
+			{
+				mGPS.getLocation();
+				m_tv.setText("Lat" + mGPS.getLatitude() + "Lon" + mGPS.getLongitude());
+			}
+			else
+			{
+				mGPS.showSettingsAlert();
+			}
+
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		_sms.Stop();
+	}
+
+	@Override
+	public void UpdateLocation()
+	{
+//		String format = sdf.format(new Date());
+//		String message = format + "\n";
+//		if (null != _loc)
+//		{
+//			message += "(lat,long)\n";
+//			message += _loc.GetInfo();
+//		}
+//		m_tv.setText(message);
+	}
+}
