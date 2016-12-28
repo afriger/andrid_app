@@ -17,8 +17,8 @@ import android.telephony.SmsMessage;
 public class PhoneSMSHelper
 {
 	// private final String testNumber = "972586910685";
-	private Context				_context;
-	private PhoneSMSReceiver	_phoneSMSReceiver;
+	private Context				m_context;
+	private PhoneSMSReceiver	m_phoneSMSReceiver;
 
 	public interface Callback
 	{
@@ -29,9 +29,9 @@ public class PhoneSMSHelper
 
 	public PhoneSMSHelper(Context context, Callback Callback)
 	{
-		this._context = context;
+		this.m_context = context;
 		mCallback = Callback;
-		_phoneSMSReceiver = new PhoneSMSReceiver();
+		m_phoneSMSReceiver = new PhoneSMSReceiver();
 	}
 
 	public class PhoneSMSReceiver extends BroadcastReceiver
@@ -104,27 +104,27 @@ public class PhoneSMSHelper
 
 	public void Start()
 	{
-		if (null != _context)
+		if (null != m_context)
 		{
 
 			IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
 			intentFilter.setPriority(Thread.MAX_PRIORITY);
-			_context.registerReceiver(_phoneSMSReceiver, intentFilter);
+			m_context.registerReceiver(m_phoneSMSReceiver, intentFilter);
 		}
 	}
 
 	public void Stop()
 	{
-		if (null != _context)
+		if (null != m_context)
 		{
-			_context.unregisterReceiver(_phoneSMSReceiver);
+			m_context.unregisterReceiver(m_phoneSMSReceiver);
 		}
 	}
 
 	public void Send(final String phoneNumber, final String message)
 	{
-		PendingIntent piSent = PendingIntent.getBroadcast(_context, 0, new Intent("SMS_SENT"), 0);
-		PendingIntent piDelivered = PendingIntent.getBroadcast(_context, 0, new Intent("SMS_DELIVERED"), 0);
+		PendingIntent piSent = PendingIntent.getBroadcast(m_context, 0, new Intent("SMS_SENT"), 0);
+		PendingIntent piDelivered = PendingIntent.getBroadcast(m_context, 0, new Intent("SMS_DELIVERED"), 0);
 		SmsManager sms = SmsManager.getDefault();
 		sms.sendTextMessage(phoneNumber, null, message, piSent, piDelivered);
 	}

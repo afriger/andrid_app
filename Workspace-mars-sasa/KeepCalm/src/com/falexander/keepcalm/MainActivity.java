@@ -101,10 +101,6 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		}
 		UpdateRescueContact();
 		// SendLocation(null);
-		// if (!m_gps.canGetLocation)
-		// {
-		// m_gps.showSettingsAlert();
-		// }
 	}
 
 	@Override
@@ -124,6 +120,10 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		int id = item.getItemId();
 		if (id == R.id.action_settings)
 		{
+			if (!m_gps.canGetLocation())
+			{
+				m_gps.showSettingsAlert();
+			}
 			m_settings_screen.setVisibility(View.VISIBLE);
 			return true;
 		}
@@ -219,7 +219,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 
 	private void SendLocation(String address)
 	{
-		if (null != m_gps && m_gps.canGetLocation)
+		if (null != m_gps && m_gps.canGetLocation())
 		{
 			String contact_number = (null == address) ? m_phone_number.getText().toString() : address;
 			if (null == contact_number || contact_number.isEmpty())
@@ -232,7 +232,6 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			sb.append(sdf.format(new Date())).append('\n').append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
 			sb.append('\n').append("http://maps.google.com/?q=").append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
 			m_sms.Send(contact_number, sb.toString());
-			// m_tv.setText(sb.toString());
 		}
 	}
 
