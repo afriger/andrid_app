@@ -39,7 +39,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	private SimpleGestureFilter	m_GestureDetector		= null;
 
 	LocationHelper				m_gps					= null;
-	//private TextView			m_tv					= null;
+	// private TextView m_tv = null;
 	private ImageButton			m_bntSend				= null;
 	private TextView			m_phone_name			= null;
 	private TextView			m_phone_number			= null;
@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		};
 		m_settings_screen = findViewById(R.id.main_setings);
 		m_settings_screen.setVisibility(View.GONE);
-		//m_tv = (TextView) findViewById(R.id.textView1);
+		// m_tv = (TextView) findViewById(R.id.textView1);
 		m_phone_name = (TextView) findViewById(R.id.tvRescuePhoneName);
 		m_phone_number = (TextView) findViewById(R.id.tvRescuePhoneNumber);
 		m_rescue_image = findViewById(R.id.imageView1);
@@ -84,7 +84,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			@Override
 			public void onClick(View v)
 			{
-				SendLocation();
+				SendLocation(null);
 			}
 		});
 
@@ -100,7 +100,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			m_settings_screen.setVisibility(View.GONE);
 		}
 		UpdateRescueContact();
-//		SendLocation();
+		// SendLocation(null);
 		// if (!m_gps.canGetLocation)
 		// {
 		// m_gps.showSettingsAlert();
@@ -199,10 +199,9 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	}
 
 	@Override
-	public void SelBody()
+	public void SpecialBody(final String address)
 	{
-		// SendLocation();
-
+		SendLocation(address);
 	}
 
 	@Override
@@ -218,11 +217,11 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		startActivityForResult(contactPickerIntent, REQUEST_CONTACT_NUMBER);
 	}
 
-	private void SendLocation()
+	private void SendLocation(String address)
 	{
 		if (null != m_gps && m_gps.canGetLocation)
 		{
-			String contact_number = m_phone_number.getText().toString();
+			String contact_number = (null == address) ? m_phone_number.getText().toString() : address;
 			if (null == contact_number || contact_number.isEmpty())
 			{
 				return;
@@ -233,7 +232,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			sb.append(sdf.format(new Date())).append('\n').append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
 			sb.append('\n').append("http://maps.google.com/?q=").append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
 			m_sms.Send(contact_number, sb.toString());
-			//m_tv.setText(sb.toString());
+			// m_tv.setText(sb.toString());
 		}
 	}
 

