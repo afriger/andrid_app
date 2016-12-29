@@ -54,6 +54,12 @@ public class MainSettings
 
 		m_edit_name = (EditText) promptsView.findViewById(R.id.edMakeName);
 		m_edit_phone = (EditText) promptsView.findViewById(R.id.edMakeNumber);
+
+		String name = PreferencesHelper.Get(context).getString(MainSettings.RESCUE_CONTACT_NAME, "Empty");
+		m_edit_name.setText(name);
+		String number = PreferencesHelper.Get(context).getString(MainSettings.RESCUE_CONTACT_NUMBER, "Empty");
+		m_edit_phone.setText(number);
+
 		// Set up the buttons
 		View ContactsCall = promptsView.findViewById(R.id.imbntContacts);
 		ContactsCall.setOnClickListener(new OnClickListener()

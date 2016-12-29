@@ -47,6 +47,25 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.all_main);
+
+		// Window window = getWindow();
+		//
+		// window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT,
+		// ViewGroup.LayoutParams.WRAP_CONTENT);
+		//// window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+		// getWindow().addFlags(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+//		 getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|
+//		 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+//		
+//		WindowManager.LayoutParams params = getWindow().getAttributes();  
+//	
+//		params.height /= 2;  
+//		params.width =500;  
+//	
+//		this.getWindow().setAttributes(params); 
+
+		
+		
 		m_gesture_detector = new SimpleGestureFilter(this, this);
 		m_settings = new MainSettings(this, this);
 		m_gps = new LocationHelper(this, this);
