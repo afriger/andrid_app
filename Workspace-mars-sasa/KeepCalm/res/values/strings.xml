@@ -10,5 +10,6 @@
     <string name="rescue_phone">Rescue Phone</string>
     <string name="name">Name:</string>
     <string name="number">Phone #</string>
+    <string name="use_contact_list">Contacts</string>
 
 </resources>

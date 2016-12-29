@@ -12,40 +12,26 @@ import com.falexander.util.SimpleGestureFilter;
 import com.falexander.util.SimpleGestureFilter.SimpleGestureListener;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements SimpleGestureListener, LocationHelper.Callback, PhoneSMSHelper.Callback
+public class MainActivity extends Activity implements SimpleGestureListener, LocationHelper.Callback, PhoneSMSHelper.Callback, MainSettings.Callback
 {
-	private static final String	RESCUE_CONTACT_NUMBER	= "rescue_contact_number";
-	private static final String	RESCUE_CONTACT_NAME		= "rescue_contact_name";
-	private static final int	REQUEST_CONTACT_NUMBER	= 11011;
+	public static final int		REQUEST_CONTACT_NUMBER	= 11011;
 
 	private Logger				log						= Logger.Log;
 	PhoneSMSHelper				m_sms					= null;
 	final SimpleDateFormat		sdf						= new SimpleDateFormat("dd-MM-yyyy-hh:mm:ss", Locale.getDefault());
-	private SimpleGestureFilter	m_GestureDetector		= null;
+	private SimpleGestureFilter	m_gesture_detector		= null;
 
 	LocationHelper				m_gps					= null;
-	// private TextView m_tv = null;
 	private ImageButton			m_bntSend				= null;
 	private TextView			m_phone_name			= null;
 	private TextView			m_phone_number			= null;
@@ -54,13 +40,15 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	private OnClickListener		m_rescue_phone_settings	= null;
 
 	private View				m_settings_screen		= null;;
+	private MainSettings		m_settings				= null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.all_main);
-		m_GestureDetector = new SimpleGestureFilter(this, this);
+		m_gesture_detector = new SimpleGestureFilter(this, this);
+		m_settings = new MainSettings(this, this);
 		m_gps = new LocationHelper(this, this);
 		m_sms = new PhoneSMSHelper(this, this);
 		m_sms.Start();
@@ -71,12 +59,11 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			@Override
 			public void onClick(View v)
 			{
-				onBrowseForNumbersButtonClicked();
+				m_settings.MakeRescueContact(MainActivity.this);
 			}
 		};
 		m_settings_screen = findViewById(R.id.main_setings);
 		m_settings_screen.setVisibility(View.GONE);
-		// m_tv = (TextView) findViewById(R.id.textView1);
 		m_phone_name = (TextView) findViewById(R.id.tvRescuePhoneName);
 		m_phone_number = (TextView) findViewById(R.id.tvRescuePhoneNumber);
 		m_rescue_image = findViewById(R.id.imageView1);
@@ -154,110 +141,14 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		{
 			if (data != null && requestCode == REQUEST_CONTACT_NUMBER)
 			{
-				ContactPicked(data);
+				m_settings.ContactPicked(data);
 			}
 		}
 		else
 		{
 			log.t("RESULT_CANCEL");
-			MakeContact();
-			
 		}
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	private void MakeContact()
-	{
-
-		final Context context = this;
-		final ViewGroup nullParent = null;
-		LayoutInflater li = LayoutInflater.from(context);
-		final View promptsView = li.inflate(R.layout.input_dialog, nullParent);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Rescue Phone");
-
-		builder.setView(promptsView);
-
-		// Set up the buttons
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				EditText name = (EditText) promptsView.findViewById(R.id.edMakeName);
-				EditText number = (EditText) promptsView.findViewById(R.id.edMakeNumber);
-				if (null != name)
-				{
-					PreferencesHelper.Edit(context).putString(RESCUE_CONTACT_NAME, name.getText().toString()).commit();
-				}
-				if (null != number)
-				{
-					PreferencesHelper.Edit(context).putString(RESCUE_CONTACT_NUMBER, number.getText().toString()).commit();
-				}
-				UpdateRescueContact();
-			}
-		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				dialog.cancel();
-			}
-		});
-
-		builder.show();
-	}
-
-	private void ContactPicked(Intent data)
-	{
-		ContentResolver cr = getContentResolver();
-		Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-		cur.moveToFirst();
-		try
-		{
-			Uri uri = data.getData();
-			cur = getContentResolver().query(uri, null, null, null, null);
-			cur.moveToFirst();
-			String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-			String formattedPhoneNumber = "Empty";
-			String idOfPhoneRecord = uri.getLastPathSegment();
-			Cursor cursor = getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER }, Phone._ID + "=?", new String[] { idOfPhoneRecord }, null);
-			if (cursor != null)
-			{
-				if (cursor.getCount() > 0)
-				{
-					cursor.moveToFirst();
-					formattedPhoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-				}
-				cursor.close();
-			}
-			PreferencesHelper.Edit(this).putString(RESCUE_CONTACT_NAME, name).commit();
-			PreferencesHelper.Edit(this).putString(RESCUE_CONTACT_NUMBER, formattedPhoneNumber).commit();
-			UpdateRescueContact();
-			return;
-		}
-		catch (Exception e)
-		{
-			// zoo
-		}
-		log.t("RESULT_EMPTY");
-	}
-
-	private void UpdateRescueContact()
-	{
-		if (null != m_phone_name)
-		{
-			String name = PreferencesHelper.Get(this).getString(RESCUE_CONTACT_NAME, "Empty");
-			m_phone_name.setText(name);
-		}
-		if (null != m_phone_number)
-		{
-			String number = PreferencesHelper.Get(this).getString(RESCUE_CONTACT_NUMBER, "Empty");
-			m_phone_number.setText(number);
-		}
-
 	}
 
 	@Override
@@ -271,12 +162,6 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	{
 		// TODO Auto-generated method stub
 
-	}
-
-	public void onBrowseForNumbersButtonClicked()
-	{
-		Intent contactPickerIntent = new Intent(Intent.ACTION_PICK, Phone.CONTENT_URI);
-		startActivityForResult(contactPickerIntent, REQUEST_CONTACT_NUMBER);
 	}
 
 	private void SendLocation(String address)
@@ -300,7 +185,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev)
 	{
-		this.m_GestureDetector.onTouchEvent(ev);
+		this.m_gesture_detector.onTouchEvent(ev);
 		return super.dispatchTouchEvent(ev);
 	}
 
@@ -337,6 +222,22 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 	public void onDoubleTap()
 	{
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void UpdateRescueContact()
+	{
+		if (null != m_phone_name)
+		{
+			String name = PreferencesHelper.Get(this).getString(MainSettings.RESCUE_CONTACT_NAME, "Empty");
+			m_phone_name.setText(name);
+		}
+		if (null != m_phone_number)
+		{
+			String number = PreferencesHelper.Get(this).getString(MainSettings.RESCUE_CONTACT_NUMBER, "Empty");
+			m_phone_number.setText(number);
+		}
 
 	}
 
