@@ -48,6 +48,9 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.all_main);
 
+		KeepCalmApp.GetApp().SetMainActivity(this);
+		
+		
 		// Window window = getWindow();
 		//
 		// window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -78,7 +81,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			@Override
 			public void onClick(View v)
 			{
-				m_settings.MakeRescueContact(MainActivity.this);
+				//m_settings.MakeRescueContact(MainActivity.this);
 			}
 		};
 		m_settings_screen = findViewById(R.id.main_setings);
@@ -140,6 +143,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 			{
 				m_gps.showSettingsAlert();
 			}
+			m_settings.MakeRescueContact(MainActivity.this);
 			m_settings_screen.setVisibility(View.VISIBLE);
 			return true;
 		}
@@ -183,7 +187,7 @@ public class MainActivity extends Activity implements SimpleGestureListener, Loc
 
 	}
 
-	private void SendLocation(String address)
+	protected void SendLocation(String address)
 	{
 		if (null != m_gps && m_gps.canGetLocation())
 		{
