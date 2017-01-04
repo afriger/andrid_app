@@ -122,7 +122,7 @@ public class AlwaysKeepsRunning extends Service implements PhoneSMSHelper.Callba
 
 	protected void SendLocation(String address)
 	{
-		log.d(tag, "SendLocation", address);
+		log.t(tag, "SendLocation", address);
 		if (null != m_gps && m_gps.canGetLocation())
 		{
 			m_gps.getLocation();
@@ -130,6 +130,7 @@ public class AlwaysKeepsRunning extends Service implements PhoneSMSHelper.Callba
 			String contact_number = (null == address) ? number : address;
 			if (null == contact_number || contact_number.isEmpty())
 			{
+				log.t(tag, "SendLocation","No number to send");
 				return;
 			}
 

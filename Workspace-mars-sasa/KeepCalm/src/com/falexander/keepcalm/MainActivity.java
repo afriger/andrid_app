@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -41,25 +42,10 @@ public class MainActivity extends Activity implements SimpleGestureListener, Mai
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.all_main);
-
+//		this.setFinishOnTouchOutside(true);
+		//getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		KeepCalmApp.GetApp().SetMainActivity(this);
-
-		// Window window = getWindow();
-		//
-		// window.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT,
-		// ViewGroup.LayoutParams.WRAP_CONTENT);
-		//// window.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-		// getWindow().addFlags(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|
-		// WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-		//
-		// WindowManager.LayoutParams params = getWindow().getAttributes();
-		//
-		// params.height /= 2;
-		// params.width =500;
-		//
-		// this.getWindow().setAttributes(params);
-
 		m_gesture_detector = new SimpleGestureFilter(this, this);
 		m_settings = new MainSettings(this, this);
 		m_rescue_phone_settings = new OnClickListener()
@@ -90,6 +76,12 @@ public class MainActivity extends Activity implements SimpleGestureListener, Mai
 			}
 		});
 
+	}
+
+	@Override
+	public void onAttachedToWindow()
+	{
+		super.onAttachedToWindow();
 	}
 
 	@Override
