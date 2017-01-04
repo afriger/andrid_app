@@ -22,5 +22,8 @@ public class Utils
 				delayCallback.AfterDelay();
 			}
 		}, secs * 1000); // afterDelay will be executed after (secs*1000) milliseconds.
+
+		//myHandler.postDelayed(myRunnable, SPLASH_DISPLAY_LENGTH); 
+		//And this to remove it. myHandler.removeCallbacks(myRunnable);
 	}
 }// class Utils

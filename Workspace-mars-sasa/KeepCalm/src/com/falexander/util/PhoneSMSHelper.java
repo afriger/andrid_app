@@ -16,6 +16,8 @@ import android.telephony.SmsMessage;
 
 public class PhoneSMSHelper
 {
+	private static final String	tag	= "SMSHelper";
+	private Logger				log	= Logger.Log;
 	// private final String testNumber = "972586910685";
 	private Context				m_context;
 	private PhoneSMSReceiver	m_phoneSMSReceiver;
@@ -92,8 +94,10 @@ public class PhoneSMSHelper
 		{
 			if (body.toLowerCase(Locale.getDefault()).contains(psw.toLowerCase(Locale.getDefault())))
 			{
+				log.t(tag, "BODY");
 				if (null != mCallback)
 				{
+					log.t(tag, "SpecialBody",addres);
 					mCallback.SpecialBody(addres);
 				}
 				break;

@@ -1,8 +1,12 @@
 package com.falexander.keepcalm;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.falexander.util.LocationHelper;
 import com.falexander.util.Logger;
+import com.falexander.util.PhoneSMSHelper;
+import com.falexander.util.PreferencesHelper;
 import com.falexander.util.Utils;
 
 import android.app.Service;
@@ -12,13 +16,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 
-public class AlwaysKeepsRunning extends Service
+public class AlwaysKeepsRunning extends Service implements PhoneSMSHelper.Callback
 {
 	private final String		tag						= "AlwaysKeepsRunning";
 	private Logger				log						= Logger.Log;
 	private BroadcastReceiver	m_PowerButtonReceiver	= null;
-	private AtomicBoolean m_needSend = new AtomicBoolean(false);
-	
+	private PhoneSMSHelper		m_sms					= null;
+
+	private AtomicBoolean		m_needSend				= new AtomicBoolean(false);
+	private LocationHelper		m_gps					= null;
+
 	public AlwaysKeepsRunning()
 	{
 	}
@@ -27,6 +34,10 @@ public class AlwaysKeepsRunning extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+		m_sms = new PhoneSMSHelper(this, this);
+		m_sms.Start();
+		m_gps = KeepCalmApp.GetApp().m_gps;
+
 		// startForeground(LadiesApp.NOTIFICATION_ID, ((LadiesApp)
 		// this.getApplication()).Note().build());
 		m_PowerButtonReceiver = new BroadcastReceiver()
@@ -43,15 +54,15 @@ public class AlwaysKeepsRunning extends Service
 				}
 				else if (action.equals(Intent.ACTION_SCREEN_ON))
 				{
-					m_needSend.set(true); 
+					m_needSend.set(true);
 					Utils.Delay(120, new Utils.DelayCallback()
 					{
 						@Override
 						public void AfterDelay()
 						{
-							if(m_needSend.get())
+							if (m_needSend.get())
 							{
-								log.t(tag,"SendHelp");
+								log.t(tag, "SendHelp");
 								KeepCalmApp.GetApp().SendHelp();
 							}
 						}
@@ -59,7 +70,7 @@ public class AlwaysKeepsRunning extends Service
 				}
 				else if (action.equals(Intent.ACTION_USER_PRESENT))
 				{
-					m_needSend.set(false); 
+					m_needSend.set(false);
 				}
 				return;
 			}
@@ -72,8 +83,8 @@ public class AlwaysKeepsRunning extends Service
 			filter.addAction(Intent.ACTION_USER_PRESENT);
 			registerReceiver(m_PowerButtonReceiver, filter);
 		}
-
-	}//
+		KeepCalmApp.GetApp().m_AlwaysKeepsRunning = this;
+	}// onReceive
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
@@ -96,6 +107,44 @@ public class AlwaysKeepsRunning extends Service
 		{
 			unregisterReceiver(m_PowerButtonReceiver);
 		}
+		if (null != m_sms)
+		{
+			m_sms.Stop();
+		}
 		super.onDestroy();
 	}
+
+	@Override
+	public void SpecialBody(String address)
+	{
+		SendLocation(address);
+	}
+
+	protected void SendLocation(String address)
+	{
+		log.d(tag, "SendLocation", address);
+		if (null != m_gps && m_gps.canGetLocation())
+		{
+			m_gps.getLocation();
+			String number = PreferencesHelper.Get(this).getString(MainSettings.RESCUE_CONTACT_NUMBER, null);
+			String contact_number = (null == address) ? number : address;
+			if (null == contact_number || contact_number.isEmpty())
+			{
+				return;
+			}
+
+			StringBuilder sb = new StringBuilder();
+			sb.append(KeepCalmApp.sdf.format(new Date())).append('\n').append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
+			sb.append('\n').append("http://maps.google.com/?q=").append(m_gps.getLatitude()).append(',').append(m_gps.getLongitude());
+			if (KeepCalmApp._DEBUG_)
+			{
+				log.t("SendLocation",contact_number, sb.toString());
+			}
+			else
+			{
+				m_sms.Send(contact_number, sb.toString());
+			}
+		}
+	}
+
 }// class AlwaysKeepsRunning
